@@ -1,9 +1,10 @@
-from input_handler import import_data, generate_data_set
+from data_handler import get_input_data
+import time
 
 if __name__ == '__main__':
     
-    input_data = import_data("Emendas.csv")
-    a,data_set_size = generate_data_set(input_data)
+    start = time.process_time()
     
-
+    data_set = get_input_data("Emendas.csv")
         
+    print(time.process_time() - start)
