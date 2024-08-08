@@ -1,10 +1,13 @@
-from data_handler import get_input_data
+from data_handler import generate_bin_files,Indexes,Functions
 import time
+import pickle
 
 if __name__ == '__main__':
     
-    start = time.process_time()
+    offsets = []
     
-    data_set = get_input_data("Emendas.csv")
-        
-    print(time.process_time() - start)
+    generate_bin_files("Emendas.csv", offsets=offsets)
+   
+    pointers_file = open("Pointers.bin", 'rb')
+    main_file = open("Amendments.bin", 'rb')
+
