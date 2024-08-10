@@ -4,7 +4,7 @@ import pickle
 from Trie import Trie
 import time
 import os
-import table_maker as tm
+#import table_maker as tm
 
 #################################
 #    MAPEAMENTO DE INDICES
@@ -129,4 +129,3 @@ if __name__ == '__main__':
             case _:
                 print("Escolha inválida.")
                 
-            
