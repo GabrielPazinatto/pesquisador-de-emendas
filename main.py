@@ -1,10 +1,13 @@
 from data_handler import generate_bin_files
+from data_handler import functions_record
 from Hash import Hash
 import pickle
 from Trie import Trie
 import time
 import os
+import data_handler
 #import table_maker as tm
+
 
 #################################
 #    MAPEAMENTO DE INDICES
@@ -40,6 +43,9 @@ authors_file = None
 authors:Trie = None
 ################################
 
+emendas= []
+
+generate_bin_files('emendas.csv', 100000, emendas)
 
 def search_by_author():
     
@@ -64,8 +70,26 @@ def search_by_author():
         rows.append([str(a[indices['year']]), str(a[indices['value']]), a[indices['function']], a[indices['state']]])
     
     print(tm.make_table(cols, rows))
+
+
+def search_by_function():
+
+    print("Entre com o nome da função: ")
+    function_name = input() 
+
+    if function_name not in functions_record:
+        print("Função inválida.")
+        return
     
-    
+    pointers = functions_record[function_name]
+
+    amendments_by_function = []
+    for pointer in pointers:
+        main_file.seek(pointer)     #offset no arquivo principal 
+        amendments_by_function.append(pickle.load(pointer)) #carrega do arquivo principal
+
+
+ 
 def load_data():
     # Faz a função atualizar as variáveis declaradas globalmente
     global pointers_file
@@ -99,6 +123,7 @@ def update_data_set():
     print("Base de dados atualizada em ", 
           time.process_time() - start, "s!")
     
+    
 #################################################
 #                   MAIN
 if __name__ == '__main__':
@@ -113,6 +138,8 @@ if __name__ == '__main__':
     while choice != '!':
         print("(0) Atualizar base de dados.")
         print("(1) Buscar emendas por nome do autor.")
+        print("(2) Buscar emendas por função.")
+        print("(3) Buscar emendas por Estado.")
         print("(!) Encerrar.")
         
         try:
@@ -124,8 +151,11 @@ if __name__ == '__main__':
                 update_data_set()
             case 1:
                 search_by_author()
+            case 2:
+                search_by_function()
             case '!':
                 exit()
-            case _:
-                print("Escolha inválida.")
+            case _:2
+print("Escolha inválida.")
+        
                 

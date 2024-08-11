@@ -65,9 +65,25 @@ states_record = {
         'SC': [],  # Santa Catarina
         'SP': [],  # São Paulo
         'SE': [],  # Sergipe
-        'TO': []   # Tocantins
-       
+        'TO': [],   # Tocantins
+        'CENTRO-OESTE' : [],
+        'SUDESTE' : [],
+        'SUL' : [],
+        'NORTE' : [],
+        'NORDESTE': [],
+        'EXTERIOR':[]
  }
+
+#Dicionário de mapeamento por Região
+region_record = {
+
+        'CENTRO-OESTE' : [],
+        'SUDESTE' : [],
+        'SUL' : [],
+        'NORTE' : [],
+        'NORDESTE': []
+}
+
 
 # Árvore de indexação de Autores para emendas
 authors_record = Trie()
@@ -86,14 +102,13 @@ def update_functions_record(item, main_file):
     else:
         functions_record[item['function']].append(main_file.tell())
 
-#Atualiza o resgistro de emendas por Estado 
+#Atualiza o resgistro de emendas por Localidade
 def update_states_record(item , main_file):
     #Se o Estado não estiver no dicionário, informa erro
     if item['state'] in states_record:
-        states_record[item['state']].append(main_file.tell()) #coloca o ponteiro para o arquivo principal no Estado correspondente
-    else:
-        print("Problema no estado")
-
+        states_record[item['state']].append(main_file.tell()) #coloca o ponteiro para o arquivo principal no Estado ou Região correspondente
+    
+        
 ##########################################################################
 
 # Armazena a árvore Trie em um arquivo binário
@@ -106,11 +121,12 @@ def generate_pointers_file(file, pointers = functions_record):
         item = pointers[key]
         pickle.dump(file = file, obj=item)
 
-#Armazena as listas dos ponteiros das emendas pelo Estado 
+#Armazena as listas dos ponteiros das emendas por localidade
 def generate_states_file(file, pointers = states_record):
-    for key in ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']:
+    for key in ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'CENTRO-OESTE', 'SUDESTE', 'SUL', 'NORTE', 'NORDESTE', 'EXTERIOR']:
         item = pointers[key]
         pickle.dump(file = file, obj = item)
+    
             
 # Gera o arquivo principal e armazena informações sobre as emendas
 # para geração dos demais arquivos.
@@ -147,7 +163,7 @@ def generate_bin_files(input_file_path: str, chunk_size:int = 100000, offsets:li
     main_file = open("Amendments.bin", "wb+")
     pointers_file = open("Pointers.bin", "wb+")
     authors_file = open("Authors.bin", "wb+")
-    states_file = open("States.bin", "wb+")
+    local_file = open("local.bin", "wb+")
     
     # Lê o arquivo de 100.000 em 100.000 linhas
     rows_read = 0
@@ -162,12 +178,12 @@ def generate_bin_files(input_file_path: str, chunk_size:int = 100000, offsets:li
     # Arquivos invertidos
     generate_pointers_file(file = pointers_file, pointers = functions_record)
     generate_authors_file(file = authors_file, pointers = authors_record)
-    generate_states_file(file = states_file, pointers = states_record)
+    generate_states_file(file = local_file, pointers = states_record)
 
     authors_file.close()
     main_file.close()
     pointers_file.close()
-    states_file.close()
+    local_file.close()
     
 # Processa uma entrada do arquivo csv
 def process_entry(row:pd.DataFrame, uid:int)->list:
@@ -189,12 +205,12 @@ def process_entry(row:pd.DataFrame, uid:int)->list:
     value += float(row["Valor Liquidado"].replace(',', '.'))
     value += float(row["Valor Pago"].replace(',', '.'))
     value += float(row["Valor Restos A Pagar Inscritos"].replace(',', '.'))
-    #value += float(row["Valor Restos A Pagar Cancelados"].replace(',', '.'))
     value += float(row["Valor Restos A Pagar Pagos"].replace(',', '.'))
 
     item['uid'] = uid
     item['value'] = value
     item['state'] = (_get_state_name(row['Localidade do gasto']))
+    #print(item['state'])
     item['function'] = (row["Nome Função"])
     item['author'] = (row["Nome do Autor da Emenda"])
     item['year'] = (int(row["Ano da Emenda"]))      
@@ -206,62 +222,63 @@ def process_entry(row:pd.DataFrame, uid:int)->list:
 def _get_state_name(s:str) -> str:
     
     state_acronym = {
-        "Acre": "AC",
-        "Alagoas": "AL",
-        "Amapa": "AP",
-        "Amazonas": "AM",
-        "Bahia": "BA",
-        "Ceara": "CE",
-        "Distrito Federal": "DF",
-        "Espírito Santo": "ES",
-        "Goias": "GO",
-        "Maranhao": "MA",
-        "Mato Grosso": "MT",
-        "Mato Grosso do Sul": "MS",
-        "Minas Gerais": "MG",
-        "Para": "PA",
-        "Paraiba": "PB",
-        "Parana": "PR",
-        "Pernambuco": "PE",
-        "Piaui": "PI",
-        "Rio de Janeiro": "RJ",
-        "Rio Grande do Norte": "RN",
-        "Rio Grande do Sul": "RS",
-        "Rondonia": "RO",
-        "Roraima": "RR",
-        "Santa Catarina": "SC",
-        "Sao Paulo": "SP",
-        "Sergipe": "SE",
-        "Tocantins": "TO"
+         "ACRE": "AC",
+        "ALAGOAS": "AL",
+        "AMAPA": "AP",
+        "AMAZONAS": "AM",
+        "BAHIA": "BA",
+        "CEARA": "CE",
+        "DISTRITO FEDERAL": "DF",
+        "ESPIRITO SANTO": "ES",
+        "GOIAS": "GO",
+        "MARANHAO": "MA",
+        "MATO GROSSO": "MT",
+        "MATO GROSSO DO SUL": "MS",
+        "MINAS GERAIS": "MG",
+        "PARA": "PA",
+        "PARAIBA": "PB",
+        "PARANA": "PR",
+        "PERNAMBUCO": "PE",
+        "PIAUI": "PI",
+        "RIO DE JANEIRO": "RJ",
+        "RIO GRANDE DO NORTE": "RN",
+        "RIO GRANDE DO SUL": "RS",
+        "RONDONIA": "RO",
+        "RORAIMA": "RR",
+        "SANTA CATARINA": "SC",
+        "SAO PAULO": "SP",
+        "SERGIPE": "SE",
+        "TOCANTINS": "TO"
     }
 
-    s = s.strip()
 
-    #retira os acentos
-    state_form = unicodedata.normalize('NFD', s)
-    s = ''.join([c for c in state_form if not unicodedata.combining(c)])
+    #Padroniza as informações
+    s = s.upper().strip()
+    s = unicodedata.normalize('NFD', s)
+    s = ''.join([c for c in s if not unicodedata.combining(c)])
+
+    #Primeiro checa se não é uma região
+    if s in region_record:
+        return s                #Se for, retorna a própria Região
     
     #Caso em "Cidade - Estado"
     if '-' in s:
-        parts = s.split('-')   
-        if len(parts) > 1: 
-            if parts[-1].strip in states_record:
-             return parts[-1].strip()
+        if s not in region_record:
+            parts = s.split('-')   
+            return parts[-1].strip()
     
     #Caso "Rio Grande do Sul (UF)"
     if '(UF)' in s:
         state_name = s.replace('(UF)', '').strip()
-        if state_acronym.get(state_name.title(), None) in states_record: 
-         return state_acronym.get(state_name.title(), None)
+        return state_acronym.get(state_name, "Formato inválido")
     
-   
-
-   
-
-
-
-
-
+    #Casos especiais 
+    if s == "NACIONAL" or s == "MULTIPLO":
+        return "DF"
     
+    if s == "EXTERIOR":
+        return "EXTERIOR"
+
+
 
 

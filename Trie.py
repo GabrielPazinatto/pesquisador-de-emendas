@@ -64,3 +64,4 @@ class Trie:
             node.value = [new_value]        
             if old_value != None:
                 node.value.append(old_value)
+
