@@ -46,7 +46,7 @@ def search_by_author():
     print("Entre com o nome do parlamentar: ")
     author_name = input()
     
-    amendments_addr = authors.search(author_name)
+    amendments_addr = authors.search_by_prefix(author_name)
     
     if amendments_addr == None:
         print("Nome não consta.\n")
@@ -63,7 +63,10 @@ def search_by_author():
     for a in amendments:
         rows.append([str(a[indices['year']]), str(a[indices['value']]), a[indices['function']], a[indices['state']]])
     
-    print(tm.make_table(cols, rows))
+    for row in tm.make_table(cols,rows).split('\n'):
+        print(row)
+    
+    #print(tm.make_table(cols, rows))
     
     
 def load_data():
@@ -96,6 +99,7 @@ def update_data_set():
     start = time.process_time()
     print("Atualizando base de dados...") 
     generate_bin_files("Emendas.csv")
+    load_data()
     print("Base de dados atualizada em ", 
           time.process_time() - start, "s!")
     
@@ -105,26 +109,29 @@ if __name__ == '__main__':
  
     print("Inicializando...")
     start = time.process_time()
-    load_data()
+    
+    try:
+        load_data()
+    except:
+        print("Dados não gerados!")
+    
     print("Programa inicializado em ",time.process_time() - start, 's!')
  
     choice = ''   
     
-    while choice != '!':
-        print("(0) Atualizar base de dados.")
-        print("(1) Buscar emendas por nome do autor.")
-        print("(!) Encerrar.")
+    while True:
+        print("(1) Atualizar base de dados.")
+        print("(2) Buscar emendas por nome do autor.")
+        print("(0) Encerrar.")
         
-        try:
-            choice = int(input())
-        except: choice = ''
+        choice = input()
     
         match(choice):
-            case 0:
+            case '1':
                 update_data_set()
-            case 1:
+            case '2':
                 search_by_author()
-            case '!':
+            case '0':
                 exit()
             case _:
                 print("Escolha inválida.")
