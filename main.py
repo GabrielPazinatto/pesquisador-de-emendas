@@ -57,17 +57,24 @@ def search_by_author():
         main_file.seek(address)
         amendments.append(pickle.load(main_file))
         
-    cols = ['Ano', 'Valor', 'Área', 'Estado']
+    cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
     rows = []
+
+    total_value = 0
+    quantity = 0
     
     for a in amendments:
-        rows.append([str(a[indices['year']]), str(a[indices['value']]), a[indices['function']], a[indices['state']]])
+        quantity += 1
+        total_value += a[indices['value']]
+        rows.append([str(a[indices['year']]),a[indices['author']], f"{round(a[indices['value']], 3)}", a[indices['function']], a[indices['state']]])
     
     for row in tm.make_table(cols,rows).split('\n'):
         print(row)
+        
+    totals_cols = ["Quantidade", "Valor Total"]
+    totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
     
-    #print(tm.make_table(cols, rows))
-    
+    print(tm.make_table(totals_cols, totals_rows, scaling=2))
     
 def load_data():
     # Faz a função atualizar as variáveis declaradas globalmente
