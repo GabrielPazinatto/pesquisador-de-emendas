@@ -1,15 +1,17 @@
 import unicodedata
 
+
+##########################################################################
 class _TrieNode:
     def __init__(self) -> None:
         self.children = [None for _ in range(26)]
         self.is_final = False
         self.value = None
-        
+##########################################################################
 class Trie:
     def __init__(self) -> None:
         self.root: _TrieNode = _TrieNode()
-        
+##########################################################################
     # Insere uma tupla (key : value) na árvore
     def insert(self, key:str, value:any):
         # Gambiarra para remover todos os caracteres especiais e letras maiúsculas dos nomes
@@ -64,4 +66,3 @@ class Trie:
             node.value = [new_value]        
             if old_value != None:
                 node.value.append(old_value)
-

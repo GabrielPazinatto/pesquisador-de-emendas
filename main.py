@@ -52,7 +52,7 @@ def search_by_author():
     print("Entre com o nome do parlamentar: ")
     author_name = input()
     
-    amendments_addr = authors.search(author_name)
+    amendments_addr = authors.search_by_prefix(author_name)
     
     if amendments_addr == None:
         print("Nome não consta.\n")
@@ -63,33 +63,20 @@ def search_by_author():
         main_file.seek(address)
         amendments.append(pickle.load(main_file))
         
-    cols = ['Ano', 'Valor', 'Área', 'Estado']
+    cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
     rows = []
+
+    total_value = 0
+    quantity = 0
     
     for a in amendments:
-        rows.append([str(a[indices['year']]), str(a[indices['value']]), a[indices['function']], a[indices['state']]])
+        quantity += 1
+        total_value += a[indices['value']]
+        rows.append([str(a[indices['year']]),a[indices['author']], f"{round(a[indices['value']], 3)}", a[indices['function']], a[indices['state']]])
     
     print(tm.make_table(cols, rows))
-
-
-def search_by_function():
-
-    print("Entre com o nome da função: ")
-    function_name = input() 
-
-    if function_name not in functions_record:
-        print("Função inválida.")
-        return
     
-    pointers = functions_record[function_name]
-
-    amendments_by_function = []
-    for pointer in pointers:
-        main_file.seek(pointer)     #offset no arquivo principal 
-        amendments_by_function.append(pickle.load(pointer)) #carrega do arquivo principal
-
-
- 
+    
 def load_data():
     # Faz a função atualizar as variáveis declaradas globalmente
     global pointers_file
@@ -120,6 +107,7 @@ def update_data_set():
     start = time.process_time()
     print("Atualizando base de dados...") 
     generate_bin_files("Emendas.csv")
+    load_data()
     print("Base de dados atualizada em ", 
           time.process_time() - start, "s!")
     
@@ -130,7 +118,12 @@ if __name__ == '__main__':
  
     print("Inicializando...")
     start = time.process_time()
-    load_data()
+    
+    try:
+        load_data()
+    except:
+        print("Dados não gerados!")
+    
     print("Programa inicializado em ",time.process_time() - start, 's!')
  
     choice = ''   
@@ -138,21 +131,15 @@ if __name__ == '__main__':
     while choice != '!':
         print("(0) Atualizar base de dados.")
         print("(1) Buscar emendas por nome do autor.")
-        print("(2) Buscar emendas por função.")
-        print("(3) Buscar emendas por Estado.")
         print("(!) Encerrar.")
         
-        try:
-            choice = int(input())
-        except: choice = ''
+        choice = input()
     
         match(choice):
-            case 0:
+            case '1':
                 update_data_set()
-            case 1:
+            case '2':
                 search_by_author()
-            case 2:
-                search_by_function()
             case '!':
                 exit()
             case _:2
