@@ -50,3 +50,9 @@ class Hash:
             for entry in row:
                 items.append(entry[1])
         return items
+
+    def get(self, key:any, default:any) ->list[any]:
+        try:
+            return self.__getitem__(key)
+        except:
+            return default

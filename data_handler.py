@@ -123,11 +123,13 @@ def generate_pointers_file(file, pointers = functions_record):
 
 #Armazena as listas dos ponteiros das emendas por localidade
 def generate_states_file(file, pointers = states_record):
-    for key in ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'CENTRO-OESTE', 'SUDESTE', 'SUL', 'NORTE', 'NORDESTE', 'EXTERIOR']:
+    for key in ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 
+                'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'CENTRO-OESTE', 'SUDESTE', 'SUL', 'NORTE', 'NORDESTE', 'EXTERIOR']:
         item = pointers[key]
         pickle.dump(file = file, obj = item)
+        
+##########################################################################
     
-            
 # Gera o arquivo principal e armazena informações sobre as emendas
 # para geração dos demais arquivos.
 def generate_main_file(chunk, rows_read:int, main_file):
@@ -210,7 +212,6 @@ def process_entry(row:pd.DataFrame, uid:int)->list:
     item['uid'] = uid
     item['value'] = value
     item['state'] = (_get_state_name(row['Localidade do gasto']))
-    #print(item['state'])
     item['function'] = (row["Nome Função"])
     item['author'] = (row["Nome do Autor da Emenda"])
     item['year'] = (int(row["Ano da Emenda"]))      
@@ -221,8 +222,9 @@ def process_entry(row:pd.DataFrame, uid:int)->list:
 # Dado um campo "localidade" de uma emenda, retorna o estado (sigla) mencionado na string
 def _get_state_name(s:str) -> str:
     
-    state_acronym = {
-         "ACRE": "AC",
+    state_acronym = Hash(
+        entries ={
+        "ACRE": "AC",
         "ALAGOAS": "AL",
         "AMAPA": "AP",
         "AMAZONAS": "AM",
@@ -249,8 +251,7 @@ def _get_state_name(s:str) -> str:
         "SAO PAULO": "SP",
         "SERGIPE": "SE",
         "TOCANTINS": "TO"
-    }
-
+    })
 
     #Padroniza as informações
     s = s.upper().strip()
@@ -278,7 +279,3 @@ def _get_state_name(s:str) -> str:
     
     if s == "EXTERIOR":
         return "EXTERIOR"
-
-
-
-

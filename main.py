@@ -1,13 +1,10 @@
 from data_handler import generate_bin_files
-from data_handler import functions_record
 from Hash import Hash
 import pickle
 from Trie import Trie
 import time
 import os
-import data_handler
-#import table_maker as tm
-
+import table_maker as tm
 
 #################################
 #    MAPEAMENTO DE INDICES
@@ -40,12 +37,40 @@ functions_pointers = Hash(
 pointers_file = None
 main_file = None
 authors_file = None
+local_file = None
 authors:Trie = None
 ################################
 
-emendas= []
+def search_by_function():
 
-generate_bin_files('emendas.csv', 100000, emendas)
+    print("Entre com o nome da função: ")
+    function_name = input() 
+
+    if function_name not in functions_pointers.keys():
+        print("Função inválida.")
+        return
+    
+    pointers = functions_pointers[function_name]
+
+    amendments = []
+    for pointer in pointers:
+        main_file.seek(pointer)     #offset no arquivo principal 
+        amendments.append(pickle.load(main_file)) #carrega do arquivo principal
+    
+    quantity = 0
+    total_value = 0
+
+    cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
+    rows = []
+    for a in amendments:
+        quantity += 1
+        total_value += a[indices['value']]
+        rows.append([str(a[indices['year']]),a[indices['author']], f"{round(a[indices['value']], 3)}", a[indices['function']], a[indices['state']]])
+        
+    totals_cols = ["Quantidade", "Valor Total", "Área"]
+    totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}", function_name]]
+    
+    print(tm.make_table(totals_cols, totals_rows, scaling=2))
 
 def search_by_author():
     
@@ -74,14 +99,20 @@ def search_by_author():
         total_value += a[indices['value']]
         rows.append([str(a[indices['year']]),a[indices['author']], f"{round(a[indices['value']], 3)}", a[indices['function']], a[indices['state']]])
     
-    print(tm.make_table(cols, rows))
+    for row in tm.make_table(cols,rows).split('\n'):
+        print(row)
+        
+    totals_cols = ["Quantidade", "Valor Total"]
+    totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
     
+    print(tm.make_table(totals_cols, totals_rows, scaling=2))
     
 def load_data():
     # Faz a função atualizar as variáveis declaradas globalmente
     global pointers_file
     global main_file
     global authors_file
+    global local_file
     global functions_pointers
     global authors
     
@@ -89,6 +120,7 @@ def load_data():
     pointers_file = open("Pointers.bin", 'rb')
     main_file = open("Amendments.bin", 'rb')
     authors_file = open("Authors.bin", 'rb')
+    local_file = open("local.bin", 'rb')
     
     # Atualiza o mapeamento de ponteiros para emenda por função
     functions_pointers['Saúde'] = pickle.load(pointers_file)
@@ -111,7 +143,6 @@ def update_data_set():
     print("Base de dados atualizada em ", 
           time.process_time() - start, "s!")
     
-    
 #################################################
 #                   MAIN
 if __name__ == '__main__':
@@ -128,10 +159,11 @@ if __name__ == '__main__':
  
     choice = ''   
     
-    while choice != '!':
-        print("(0) Atualizar base de dados.")
-        print("(1) Buscar emendas por nome do autor.")
-        print("(!) Encerrar.")
+    while True:
+        print("(1) Atualizar base de dados.")
+        print("(2) Buscar emendas por nome do autor.")
+        print("(3) Buscar emendas por função.")
+        print("(0) Encerrar.")
         
         choice = input()
     
@@ -140,9 +172,11 @@ if __name__ == '__main__':
                 update_data_set()
             case '2':
                 search_by_author()
-            case '!':
+            case '3':
+                search_by_function()
+            case '0':
                 exit()
-            case _:2
-print("Escolha inválida.")
-        
+            case _:
+                print("Escolha inválida.")
                 
+            
