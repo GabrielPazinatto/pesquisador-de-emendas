@@ -49,7 +49,8 @@ class Updater:
         #  MAPEAMENTO DE PONTEIROS PARA 
         #      EMENDAS POR ESTADO
         ################################
-        self.states_record = {
+        self.states_record = Hash(
+            entries={
             'AC': [],  # Acre
             'AL': [],  # Alagoas
             'AP': [],  # Amapá
@@ -83,7 +84,7 @@ class Updater:
             'NORTE' : [],
             'NORDESTE': [],
             'EXTERIOR':[]
-    }
+    })
 
         ################################
         #  MAPEAMENTO DE PONTEIROS PARA 
@@ -311,3 +312,4 @@ class Updater:
         
         if s == "EXTERIOR":
             return "EXTERIOR"
+        
