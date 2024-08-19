@@ -226,7 +226,7 @@ class Updater:
     #Atualiza o resgistro de emendas por Localidade
     def _update_states_record(self, item , main_file):
         #Se o Estado não estiver no dicionário, informa erro
-        if item['state'] in self.states_record:
+        if item['state'] in self.states_record.keys():
             self.states_record[item['state']].append(main_file.tell()) #coloca o ponteiro para o arquivo principal no Estado ou Região correspondente
             
 
@@ -245,10 +245,7 @@ class Updater:
 
     #Armazena as listas dos ponteiros das emendas por localidade
     def _generate_states_file(self, file):
-        for key in ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 
-                    'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO', 'CENTRO-OESTE', 'SUDESTE', 'SUL', 'NORTE', 'NORDESTE', 'EXTERIOR']:
-            item = self.states_record[key]
-            pickle.dump(file = file, obj = item)
+        pickle.dump(file = file, obj = self.states_record)
             
 ##########################################################################
     # Processa uma entrada do arquivo csv
