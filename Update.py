@@ -160,6 +160,8 @@ class Updater:
         authors_file = open("Authors.bin", "wb+")
         local_file = open("local.bin", "wb+")
         
+        self.__init__()
+        
         # Lê o arquivo de 100.000 em 100.000 linhas
         rows_read = 0
         for chunk in pd.read_csv(
