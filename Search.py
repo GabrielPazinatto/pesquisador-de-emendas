@@ -1,10 +1,13 @@
 from Hash import Hash
 from Load import Loader
+from quicksort import quicksort_iterative
 
 import pickle
 import table_maker as tm
 
+
 _MAIN_FILE_PATH = "Amendments.bin"
+
 
 class Searcher(Loader):
     
@@ -13,7 +16,7 @@ class Searcher(Loader):
 
 ################################################################################################
     #Busca por as emendas por função utilizando o arquivo invertido
-    def search_by_function(self):
+    def search_by_function(self, ascending: bool):
 
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
@@ -35,7 +38,9 @@ class Searcher(Loader):
         for pointer in pointers:
             main_file.seek(pointer)     #offset no arquivo principal 
             amendments.append(pickle.load(main_file)) #carrega do arquivo principal
-        
+
+        #quicksort_iterative(amendments, ascending)
+
         quantity = 0 #Total de emendas dessa função
         total_value = 0 #Total gasto nessa área (Saúde, Educação..)
 
@@ -56,7 +61,7 @@ class Searcher(Loader):
 
 ##############################################################################################################################
     #Busca as emendas pelo autor
-    def search_by_author(self):
+    def search_by_author(self, ascending: bool):
         
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
@@ -73,10 +78,13 @@ class Searcher(Loader):
             return
 
         amendments = []
+
         #Busca os offsets no arquivo principal
         for address in amendments_addr:
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
+
+        #quicksort_iterative(amendments, ascending)
         
         #Parametros das emendas
         cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
@@ -103,12 +111,14 @@ class Searcher(Loader):
 
 ####################################################################################################################################
     #Busca as emendas por localidade (Estado, região do Brasil, ou Exterior)
-    def search_by_local(self):
+    def search_by_local(self, ascending: bool):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
         print("Entre com o nome da localidade: ")
         local_name = input()
+
+        print(type(self.states_record))
 
         #Confere se a localidade de entrada é válida 
         if local_name not in self.states_record.keys():
@@ -126,6 +136,16 @@ class Searcher(Loader):
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
 
+        for a in amendments:
+            print(a[self.indices['value']])
+        
+        print("####################################")
+        
+        quicksort_iterative(amendments, ascending)
+
+        for a in amendments:
+            print(a[self.indices['value']])
+
         #Parametros das emendas
         cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
         rows = []
@@ -138,16 +158,17 @@ class Searcher(Loader):
             quantity += 1
             total_value += a[self.indices['value']]
             rows.append([str(a[self.indices['year']]),a[self.indices['author']], 
-                         f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
+                        f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
+            
         #Mostra as emendas
-        for row in tm.make_table(cols,rows).split('\n'):
-            print(row)
+       # for row in tm.make_table(cols,rows).split('\n'):
+       #     print(row)
         
         #Mostra o a quantidade total de emendas e o valor total delas 
         totals_cols = ["Quantidade", "Valor Total"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
         
-        print(tm.make_table(totals_cols, totals_rows, scaling=2))
+       # print(tm.make_table(totals_cols, totals_rows, scaling=2))
 
 ###############################################################
 #   FUNÇÕES QUE PROCESSAM TODAS AS INFORMAÇÕES DO ARQUIVO 
@@ -255,9 +276,9 @@ class Searcher(Loader):
         #Para cada key(localida), salva a key, o valor total e a quantidade total em uma linha
         for key in valores_por_estado.keys():
             rows.append([key,f"{round(valores_por_estado[key][0],3):,}", f"{valores_por_estado[key][1]}"]) #local,valor,quantidade
-            
+
         #Apresenta os dados
         for row in tm.make_table(cols=cols, rows=rows).split('\n'):
             print(row)
 
-   
+
