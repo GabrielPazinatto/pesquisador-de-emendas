@@ -26,16 +26,28 @@ if __name__ == '__main__':
         print("(0) Encerrar.")
         
         choice = input()
-    
+
+        
+        print("Escolha a ordem dos valores: ")
+        print("(1) CRESCENTE. ")
+        print("(2) DESCRESCENTE. ")
+        order = input()
+
+        match(choice):
+            case '1':
+                order = True
+            case '2':
+                order = False
+
         match(choice):
             case '1':
                 data_manager.update_data_set()
             case '2':
-                data_manager.search_by_author()
+                data_manager.search_by_author(order)
             case '3':
-                data_manager.search_by_function()
+                data_manager.search_by_function(order)
             case '4':
-                data_manager.search_by_local()
+                data_manager.search_by_local(order)
             case '5':
                 data_manager.show_total_by_year()
             case '6':
