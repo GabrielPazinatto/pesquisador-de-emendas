@@ -39,7 +39,7 @@ class Searcher(Loader):
             main_file.seek(pointer)     #offset no arquivo principal 
             amendments.append(pickle.load(main_file)) #carrega do arquivo principal
 
-        #quicksort_iterative(amendments, ascending)
+        amendments = quicksort_iterative(amendments, ascending)
 
         quantity = 0 #Total de emendas dessa função
         total_value = 0 #Total gasto nessa área (Saúde, Educação..)
@@ -84,7 +84,7 @@ class Searcher(Loader):
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
 
-        #quicksort_iterative(amendments, ascending)
+        amendments = quicksort_iterative(amendments, ascending)
         
         #Parametros das emendas
         cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
@@ -118,8 +118,6 @@ class Searcher(Loader):
         print("Entre com o nome da localidade: ")
         local_name = input()
 
-        print(type(self.states_record))
-
         #Confere se a localidade de entrada é válida 
         if local_name not in self.states_record.keys():
             print("Localidade inválida")
@@ -135,16 +133,8 @@ class Searcher(Loader):
         for address in pointers:
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
-
-        for a in amendments:
-            print(a[self.indices['value']])
         
-        print("####################################")
-        
-        quicksort_iterative(amendments, ascending)
-
-        for a in amendments:
-            print(a[self.indices['value']])
+        amendments = quicksort_iterative(amendments, ascending)
 
         #Parametros das emendas
         cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
@@ -161,14 +151,14 @@ class Searcher(Loader):
                         f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
             
         #Mostra as emendas
-       # for row in tm.make_table(cols,rows).split('\n'):
-       #     print(row)
+        for row in tm.make_table(cols,rows).split('\n'):
+            print(row)
         
         #Mostra o a quantidade total de emendas e o valor total delas 
         totals_cols = ["Quantidade", "Valor Total"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
         
-       # print(tm.make_table(totals_cols, totals_rows, scaling=2))
+        print(tm.make_table(totals_cols, totals_rows, scaling=2))
 
 ###############################################################
 #   FUNÇÕES QUE PROCESSAM TODAS AS INFORMAÇÕES DO ARQUIVO 
@@ -181,19 +171,19 @@ class Searcher(Loader):
         main_file = open(_MAIN_FILE_PATH, 'rb')
         
         #Hash para armazezenar os valores e quantidades pela key
-        valor_por_ano = Hash()
+        value_by_year = Hash()
         
         #Loop para processar o arquivo 
         while True:
             try:
                 emenda = pickle.load(main_file) #Carrega a emenda
 
-                if valor_por_ano[str(emenda[self.indices['year']])] == None:    #Se ela ainda não está na Hash
-                    valor_por_ano[str(emenda[self.indices['year']])] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor
+                if value_by_year[str(emenda[self.indices['year']])] == None:    #Se ela ainda não está na Hash
+                    value_by_year[str(emenda[self.indices['year']])] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor
 
                 else:
-                    valor_por_ano[str(emenda[self.indices['year']])][0] += emenda[self.indices['value']] #Soma o valor de cada emenda ao total da key
-                    valor_por_ano[str(emenda[self.indices['year']])][1] += 1 #Conta a quantidade 
+                    value_by_year[str(emenda[self.indices['year']])][0] += emenda[self.indices['value']] #Soma o valor de cada emenda ao total da key
+                    value_by_year[str(emenda[self.indices['year']])][1] += 1 #Conta a quantidade 
 
             except EOFError:
                 break  
@@ -203,9 +193,10 @@ class Searcher(Loader):
         rows = []
         
         #Para cada key (ano), salva o ano, o valor total e a quantidade 
-        for key in valor_por_ano.keys():
-            rows.append([f"{key}", f"{round(valor_por_ano[key][0], 3):,}", f"{valor_por_ano[key][1]}"]) #ano, valor, quantidade
+        for key in value_by_year.keys():
+            rows.append([f"{key}", f"{round(value_by_year[key][0], 3):,}", f"{value_by_year[key][1]}"]) #ano, valor, quantidade
         
+        #Apresenta os dados
         for row in tm.make_table(cols,rows).split('\n'):
             print(row)
         
@@ -217,7 +208,7 @@ class Searcher(Loader):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
-        valores_por_função = Hash ()
+        value_by_function = Hash ()
 
         #Utiliza os offsets do arquivo invertido 
         for key in self.functions_pointers.keys():
@@ -228,19 +219,19 @@ class Searcher(Loader):
                 main_file.seek(pointer)     #offset no arquivo principal 
                 emenda = pickle.load(main_file) #carrega do arquivo principal
 
-                if valores_por_função[emenda[self.indices['function']]] == None: #Se ainda não está na Hash
-                    valores_por_função[emenda[self.indices['function']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor
+                if value_by_function[emenda[self.indices['function']]] == None: #Se ainda não está na Hash
+                    value_by_function[emenda[self.indices['function']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor
                 else:
-                    valores_por_função[emenda[self.indices['function']]][0] += emenda[self.indices['value']] #Soma ao valor total 
-                    valores_por_função[emenda[self.indices['function']]][1] += 1 #Soma as quantidades 
+                    value_by_function[emenda[self.indices['function']]][0] += emenda[self.indices['value']] #Soma ao valor total 
+                    value_by_function[emenda[self.indices['function']]][1] += 1 #Soma as quantidades 
 
         #Define as colunas a serem exibidas
         cols = ['Função', 'Valor', 'Quantidade']
         rows = []
 
         #Para cada key (função), salva a key, valor total desembolsado e a quantidade total
-        for key in valores_por_função.keys():
-            rows.append([key,f"{round(valores_por_função[key][0],3):,}", f"{valores_por_função[key][1]}"]) #função, valor,quantidade
+        for key in value_by_function.keys():
+            rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
 
         #Mostra as informações
         for row in tm.make_table(cols=cols, rows=rows).split('\n'):
@@ -253,7 +244,7 @@ class Searcher(Loader):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
-        valores_por_estado = Hash()
+        value_by_local = Hash()
 
         #Utiliza os offsets do arquivo invertido 
         for key in self.states_record.keys():
@@ -263,19 +254,19 @@ class Searcher(Loader):
                 main_file.seek(pointer)     #offset no arquivo principal 
                 emenda = pickle.load(main_file) #carrega do arquivo principal
                 
-                if valores_por_estado[emenda[self.indices['state']]] == None: #Se ainda não está na Hash 
-                    valores_por_estado[emenda[self.indices['state']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor e a quantidade 
+                if value_by_local[emenda[self.indices['state']]] == None: #Se ainda não está na Hash 
+                    value_by_local[emenda[self.indices['state']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor e a quantidade 
                 else:
-                    valores_por_estado[emenda[self.indices['state']]][0] += emenda[self.indices['value']] #Soma o valor total
-                    valores_por_estado[emenda[self.indices['state']]][1] += 1 #Soma as quantidades
+                    value_by_local[emenda[self.indices['state']]][0] += emenda[self.indices['value']] #Soma o valor total
+                    value_by_local[emenda[self.indices['state']]][1] += 1 #Soma as quantidades
             
         #Define as colunas a serem apresentadas
         cols = ['Local', 'Valor', 'Quantidade']
         rows = []
 
         #Para cada key(localida), salva a key, o valor total e a quantidade total em uma linha
-        for key in valores_por_estado.keys():
-            rows.append([key,f"{round(valores_por_estado[key][0],3):,}", f"{valores_por_estado[key][1]}"]) #local,valor,quantidade
+        for key in value_by_local.keys():
+            rows.append([key,f"{round(value_by_local[key][0],3):,}", f"{value_by_local[key][1]}"]) #local,valor,quantidade
 
         #Apresenta os dados
         for row in tm.make_table(cols=cols, rows=rows).split('\n'):
