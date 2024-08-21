@@ -3,7 +3,7 @@ from Load import Loader
 from quicksort import quicksort_iterative
 
 import pickle
-import table_maker as tm
+from tabulate import tabulate
 
 
 _MAIN_FILE_PATH = "Amendments.bin"
@@ -55,11 +55,13 @@ class Searcher(Loader):
             rows.append([str(a[self.indices['year']]),a[self.indices['author']], f"{round(a[self.indices['value']], 3)}", 
                          a[self.indices['function']], a[self.indices['state']]])
 
-        #   
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
+            print(row)
+        
         totals_cols = ["Quantidade", "Valor Total", "Área"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}", function_name]]
         
-        print(tm.make_table(totals_cols, totals_rows, scaling=2))
+        print('\n',tabulate(totals_rows, totals_cols, disable_numparse=True),'\n')
 
 ##############################################################################################################################
     #Busca as emendas pelo autor
@@ -105,14 +107,14 @@ class Searcher(Loader):
             rows.append([str(a[self.indices['year']]),a[self.indices['author']], 
                          f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
         
-        for row in tm.make_table(cols,rows).split('\n'):
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
         
         #Mostra a quantidade total de emendas e o valor total das emendas desse parlamentar 
         totals_cols = ["Quantidade", "Valor Total"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]] 
         
-        print(tm.make_table(totals_cols, totals_rows, scaling=2))
+        print('\n',tabulate(totals_rows, totals_cols, disable_numparse=True),'\n')
 
 ####################################################################################################################################
     #Busca as emendas por localidade (Estado, região do Brasil, ou Exterior)
@@ -158,14 +160,14 @@ class Searcher(Loader):
                         f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
             
         #Mostra as emendas
-        for row in tm.make_table(cols,rows).split('\n'):
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
         
         #Mostra o a quantidade total de emendas e o valor total delas 
         totals_cols = ["Quantidade", "Valor Total"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
         
-        print(tm.make_table(totals_cols, totals_rows, scaling=2))
+        print('\n',tabulate(totals_cols, totals_rows, disable_numparse=True),'\n')
 
 ###############################################################
 #   FUNÇÕES QUE PROCESSAM TODAS AS INFORMAÇÕES DO ARQUIVO 
@@ -206,7 +208,7 @@ class Searcher(Loader):
             rows.append([f"{key}", f"{round(value_by_year[key][0], 3):,}", f"{value_by_year[key][1]}"]) #ano, valor, quantidade
         
         #Apresenta os dados
-        for row in tm.make_table(cols,rows).split('\n'):
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
         
 ##################################################################################################################################
@@ -242,12 +244,12 @@ class Searcher(Loader):
         rows = []
 
         #Para cada key (função), salva a key, valor total desembolsado e a quantidade total
-        #for key in value_by_function.keys():
-        #    rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
+        for key in value_by_function.keys():
+            rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
 
         #Mostra as informações
-        #for row in tm.make_table(cols=cols, rows=rows).split('\n'):
-        #    print(row)
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
+            print(row)
 
 ######################################################################################################################################
     #Mostra o total gasto e a quantidade total de emendas por localidade (Estado, região do Brasil ou Exterior)
@@ -283,7 +285,7 @@ class Searcher(Loader):
             rows.append([key,f"{round(value_by_local[key][0],3):,}", f"{value_by_local[key][1]}"]) #local,valor,quantidade
 
         #Apresenta os dados
-        for row in tm.make_table(cols=cols, rows=rows).split('\n'):
+        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
 
 
