@@ -89,9 +89,10 @@ class Trie:
         if node.value != None:
             output.extend(node.value)   
         
-        for val in self._search_by_prefix_aux(node):    # Retorna todos os valores cujas chaves
-            output.extend(val)                          # começam com o prefixo (visita todos os
-                                                        # nodos em níveis mais baixos do atual)
+        if not node.is_final:
+            for val in self._search_by_prefix_aux(node):    # Retorna todos os valores cujas chaves
+                output.extend(val)                          # começam com o prefixo (visita todos os
+                                                            # nodos em níveis mais baixos do atual)
         return output
         
     # Retorna todos os valores dos nodos abaixo do nodo informado
