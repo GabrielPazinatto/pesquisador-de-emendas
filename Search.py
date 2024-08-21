@@ -21,9 +21,29 @@ class Searcher(Loader):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
-        print("Entre com o nome da função: ")
-        function_name = input() 
-
+        print("Escolha a função: ")
+        print("(0) Saúde")
+        print("(1) Educação")
+        print("(2) Urbanismo")
+        print("(3) Agricultura")
+        print("(4) Assistência social")
+        print("(5) Outros")
+        function = input()
+        
+        match function:
+            case '0':
+                function_name = 'Saúde'
+            case '1':
+                function_name = 'Educação'
+            case '2':
+                function_name = 'Urbanismo'
+            case '3':
+                function_name = 'Agricultura'
+            case '4':
+                function_name = 'Assistência social'
+            case _:
+                function_name = 'Outros'
+                
         #Valida a função
         if function_name not in self.functions_pointers.keys():
             print("Função inválida.")
@@ -122,7 +142,7 @@ class Searcher(Loader):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
-        print("Entre com o nome da localidade: ")
+        print("Entre com o nome da localidade: (Sigla do Estado)")
         local_name = input()
 
         #Confere se a localidade de entrada é válida 
@@ -167,7 +187,7 @@ class Searcher(Loader):
         totals_cols = ["Quantidade", "Valor Total"]
         totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
         
-        print('\n',tabulate(totals_cols, totals_rows, disable_numparse=True),'\n')
+        print('\n',tabulate(totals_rows, totals_cols,  disable_numparse=True),'\n')
 
 ###############################################################
 #   FUNÇÕES QUE PROCESSAM TODAS AS INFORMAÇÕES DO ARQUIVO 
@@ -210,6 +230,8 @@ class Searcher(Loader):
         #Apresenta os dados
         for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
+            
+        print('\n')
         
 ##################################################################################################################################
 
@@ -225,7 +247,6 @@ class Searcher(Loader):
         for key in self.functions_pointers.keys():
              #Salva os offstes de cada key (função)
              pointers = self.functions_pointers[key]
-             print(key)
 
              for pointer in pointers:
                 main_file.seek(pointer)     #offset no arquivo principal 
@@ -250,6 +271,8 @@ class Searcher(Loader):
         #Mostra as informações
         for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
+            
+        print('\n')
 
 ######################################################################################################################################
     #Mostra o total gasto e a quantidade total de emendas por localidade (Estado, região do Brasil ou Exterior)
@@ -288,4 +311,5 @@ class Searcher(Loader):
         for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
             print(row)
 
+        print('\n')
 
