@@ -39,6 +39,8 @@ class Searcher(Loader):
             main_file.seek(pointer)     #offset no arquivo principal 
             amendments.append(pickle.load(main_file)) #carrega do arquivo principal
 
+        main_file.close()
+
         amendments = quicksort_iterative(amendments, ascending)
 
         quantity = 0 #Total de emendas dessa função
@@ -84,8 +86,10 @@ class Searcher(Loader):
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
 
+        main_file.close()
+
         amendments = quicksort_iterative(amendments, ascending)
-        
+
         #Parametros das emendas
         cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
         rows = []
@@ -97,6 +101,7 @@ class Searcher(Loader):
         for a in amendments:
             quantity += 1
             total_value += a[self.indices['value']]
+            # print(a[self.indices['value']]) ta certo 
             rows.append([str(a[self.indices['year']]),a[self.indices['author']], 
                          f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
         
@@ -133,6 +138,8 @@ class Searcher(Loader):
         for address in pointers:
             main_file.seek(address)
             amendments.append(pickle.load(main_file))
+
+        main_file.close()
         
         amendments = quicksort_iterative(amendments, ascending)
 
@@ -187,6 +194,8 @@ class Searcher(Loader):
 
             except EOFError:
                 break  
+
+        main_file.close()
         
         #Define as colunas a serem exibidas 
         cols = ['Ano', 'Valor', 'Quantidade']
@@ -214,6 +223,7 @@ class Searcher(Loader):
         for key in self.functions_pointers.keys():
              #Salva os offstes de cada key (função)
              pointers = self.functions_pointers[key]
+             print(key)
 
              for pointer in pointers:
                 main_file.seek(pointer)     #offset no arquivo principal 
@@ -225,17 +235,19 @@ class Searcher(Loader):
                     value_by_function[emenda[self.indices['function']]][0] += emenda[self.indices['value']] #Soma ao valor total 
                     value_by_function[emenda[self.indices['function']]][1] += 1 #Soma as quantidades 
 
+        main_file.close()
+
         #Define as colunas a serem exibidas
         cols = ['Função', 'Valor', 'Quantidade']
         rows = []
 
         #Para cada key (função), salva a key, valor total desembolsado e a quantidade total
-        for key in value_by_function.keys():
-            rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
+        #for key in value_by_function.keys():
+        #    rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
 
         #Mostra as informações
-        for row in tm.make_table(cols=cols, rows=rows).split('\n'):
-            print(row)
+        #for row in tm.make_table(cols=cols, rows=rows).split('\n'):
+        #    print(row)
 
 ######################################################################################################################################
     #Mostra o total gasto e a quantidade total de emendas por localidade (Estado, região do Brasil ou Exterior)
@@ -260,6 +272,8 @@ class Searcher(Loader):
                     value_by_local[emenda[self.indices['state']]][0] += emenda[self.indices['value']] #Soma o valor total
                     value_by_local[emenda[self.indices['state']]][1] += 1 #Soma as quantidades
             
+        main_file.close()
+
         #Define as colunas a serem apresentadas
         cols = ['Local', 'Valor', 'Quantidade']
         rows = []
