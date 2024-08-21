@@ -42,7 +42,7 @@ class Hash:
         for row in self.table:
             for entry in row:
                 keys.append(entry[0])
-        return keys
+        return set(keys)
     
     def items(self) ->list[any]:        # Retorna todos os valores
         items= []
