@@ -16,38 +16,37 @@ class Searcher(Loader):
 
 ################################################################################################
     #Busca por as emendas por função utilizando o arquivo invertido
-    def search_by_function(self, ascending: bool):
+    def search_by_function(self, function_name:str, ascending: bool):
 
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
-        print("Escolha a função: ")
-        print("(0) Saúde")
-        print("(1) Educação")
-        print("(2) Urbanismo")
-        print("(3) Agricultura")
-        print("(4) Assistência social")
-        print("(5) Outros")
-        function = input()
+        # print("Escolha a função: ")
+        # print("(0) Saúde")
+        # print("(1) Educação")
+        # print("(2) Urbanismo")
+        # print("(3) Agricultura")
+        # print("(4) Assistência social")
+        # print("(5) Outros")
+        # function = input()
         
-        match function:
-            case '0':
-                function_name = 'Saúde'
-            case '1':
-                function_name = 'Educação'
-            case '2':
-                function_name = 'Urbanismo'
-            case '3':
-                function_name = 'Agricultura'
-            case '4':
-                function_name = 'Assistência social'
-            case _:
-                function_name = 'Outros'
+        # match function:
+        #     case '0':
+        #         function_name = 'Saúde'
+        #     case '1':
+        #         function_name = 'Educação'
+        #     case '2':
+        #         function_name = 'Urbanismo'
+        #     case '3':
+        #         function_name = 'Agricultura'
+        #     case '4':
+        #         function_name = 'Assistência social'
+        #     case _:
+        #         function_name = 'Outros'
                 
         #Valida a função
         if function_name not in self.functions_pointers.keys():
-            print("Função inválida.")
-            return
+            return 'Função inválida'	
         
         #Salva a lista de ponteiros (offset) para essa emendas 
         pointers = self.functions_pointers[function_name]
@@ -66,32 +65,23 @@ class Searcher(Loader):
         quantity = 0 #Total de emendas dessa função
         total_value = 0 #Total gasto nessa área (Saúde, Educação..)
 
-        cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
-        rows = []
         #Salva as informações da emenda por linha
         for a in amendments:
             quantity += 1
             total_value += a[self.indices['value']]
-            rows.append([str(a[self.indices['year']]),a[self.indices['author']], f"{round(a[self.indices['value']], 3)}", 
-                         a[self.indices['function']], a[self.indices['state']]])
 
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-        
-        totals_cols = ["Quantidade", "Valor Total", "Área"]
-        totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}", function_name]]
-        
-        print('\n',tabulate(totals_rows, totals_cols, disable_numparse=True),'\n')
+        return amendments, quantity, total_value
 
 ##############################################################################################################################
     #Busca as emendas pelo autor
-    def search_by_author(self, ascending: bool):
+    def search_by_author(self, author_name:str = None, ascending:bool = True):
         
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
         
-        print("Entre com o nome do parlamentar: ")
-        author_name = input()
+        if author_name == None:
+            print("Entre com o nome do parlamentar: ")
+            author_name = input()
         
         #Procura na TRIE o offset pelos nomes dos parlamentares 
         amendments_addr = self.authors_record.search_by_prefix(author_name)
@@ -112,29 +102,16 @@ class Searcher(Loader):
 
         amendments = quicksort_iterative(amendments, ascending)
 
-        #Parametros das emendas
-        cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
-        rows = []
 
-        total_value = 0 #total de gasto desse parlamentar
-        quantity = 0    #quantidade de emendas desse parlamentar 
         
-        #Salva as informações de cada emenda por linha
+        #Salva as informações da emenda por linha
+        quantity = 0
+        total_value = 0
         for a in amendments:
             quantity += 1
             total_value += a[self.indices['value']]
-            # print(a[self.indices['value']]) ta certo 
-            rows.append([str(a[self.indices['year']]),a[self.indices['author']], 
-                         f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
-        
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-        
-        #Mostra a quantidade total de emendas e o valor total das emendas desse parlamentar 
-        totals_cols = ["Quantidade", "Valor Total"]
-        totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]] 
-        
-        print('\n',tabulate(totals_rows, totals_cols, disable_numparse=True),'\n')
+
+        return amendments, quantity, total_value
 
 ####################################################################################################################################
     #Busca as emendas por localidade (Estado, região do Brasil, ou Exterior)
@@ -165,29 +142,15 @@ class Searcher(Loader):
         
         amendments = quicksort_iterative(amendments, ascending)
 
-        #Parametros das emendas
-        cols = ['Ano', 'Autor', 'Valor', 'Área', 'Estado']
-        rows = []
-
+        #Salva as informações da emenda por linha
         total_value = 0  #total gasto nessa localidade
         quantity = 0     #total de emendas nessa localidade
-
-        #Salva as informações das emendas por linha
         for a in amendments:
             quantity += 1
             total_value += a[self.indices['value']]
-            rows.append([str(a[self.indices['year']]),a[self.indices['author']], 
-                        f"{round(a[self.indices['value']], 3)}", a[self.indices['function']], a[self.indices['state']]])
-            
-        #Mostra as emendas
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-        
-        #Mostra o a quantidade total de emendas e o valor total delas 
-        totals_cols = ["Quantidade", "Valor Total"]
-        totals_rows = [[f"{quantity:,}" ,f"{round(total_value, 3):,}"]]
-        
-        print('\n',tabulate(totals_rows, totals_cols,  disable_numparse=True),'\n')
+
+        return amendments, quantity, total_value
+
 
 ###############################################################
 #   FUNÇÕES QUE PROCESSAM TODAS AS INFORMAÇÕES DO ARQUIVO 
@@ -218,20 +181,8 @@ class Searcher(Loader):
                 break  
 
         main_file.close()
-        
-        #Define as colunas a serem exibidas 
-        cols = ['Ano', 'Valor', 'Quantidade']
-        rows = []
-        
-        #Para cada key (ano), salva o ano, o valor total e a quantidade 
-        for key in value_by_year.keys():
-            rows.append([f"{key}", f"{round(value_by_year[key][0], 3):,}", f"{value_by_year[key][1]}"]) #ano, valor, quantidade
-        
-        #Apresenta os dados
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-            
-        print('\n')
+
+        return [value_by_year[key] for key in value_by_year.keys()]
         
 ##################################################################################################################################
 
@@ -260,19 +211,7 @@ class Searcher(Loader):
 
         main_file.close()
 
-        #Define as colunas a serem exibidas
-        cols = ['Função', 'Valor', 'Quantidade']
-        rows = []
-
-        #Para cada key (função), salva a key, valor total desembolsado e a quantidade total
-        for key in value_by_function.keys():
-            rows.append([key,f"{round(value_by_function[key][0],3):,}", f"{value_by_function[key][1]}"]) #função, valor,quantidade
-
-        #Mostra as informações
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-            
-        print('\n')
+        return [value_by_function[key] for key in value_by_function.keys()]
 
 ######################################################################################################################################
     #Mostra o total gasto e a quantidade total de emendas por localidade (Estado, região do Brasil ou Exterior)
@@ -299,17 +238,4 @@ class Searcher(Loader):
             
         main_file.close()
 
-        #Define as colunas a serem apresentadas
-        cols = ['Local', 'Valor', 'Quantidade']
-        rows = []
-
-        #Para cada key(localida), salva a key, o valor total e a quantidade total em uma linha
-        for key in value_by_local.keys():
-            rows.append([key,f"{round(value_by_local[key][0],3):,}", f"{value_by_local[key][1]}"]) #local,valor,quantidade
-
-        #Apresenta os dados
-        for row in tabulate(rows, cols, disable_numparse=True).split('\n'):
-            print(row)
-
-        print('\n')
-
+        return [value_by_local[key] for key in value_by_local.keys()]
