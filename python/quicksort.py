@@ -3,7 +3,7 @@ import unicodedata
 ###################################################################################################################################
 
     #Função que dado um array, realiza a escolha do pivo (elemento base para a ordenação do array) e reorganiza os valores com base no pivo
-def partition(array, low, high, ascending: bool):
+def partition(array, low, high, ascending: bool, key:str):
         i = low - 1 #marca a posição onde o próximo elemento menor deve ser colocado, iniciando do mais a esquerda
 
         pivot = array[high]  # Define o último elemento do array como pivô [[], [], [], []  <---]
@@ -11,7 +11,7 @@ def partition(array, low, high, ascending: bool):
         for j in range(low, high):
             #Se o elemento for menor que o pivo e está em ordem crescente (menores a esquerda) troca 
             #Ou, se o elemento for maior que o pivo e está em ordem decrescente (maiores a esquerda) troca
-            if (array[j][1] <= pivot[1] and ascending) or (array[j][1] >= pivot[1] and not ascending):
+            if (array[j][key] <= pivot[key] and ascending) or (array[j][key] >= pivot[key] and not ascending):
                 i += 1 
                 array[i], array[j] = array[j], array[i]  # Troca para o próximo índice depois do menor anteriormente adicionado
 
@@ -22,8 +22,7 @@ def partition(array, low, high, ascending: bool):
 ######################################################################################################################################
 
 #Quicksort iterativo para ordenação crescente e decrescente de um array, utiliza pilha para guardar os subarrays que ainda precisam ser ordenados
-def quicksort_iterative(amendments, ascending=True):
-        
+def quicksort_iterative(amendments, ascending=True, key:str = 'value'):
         low = 0
         high = len(amendments) - 1
         size = high - low + 1
@@ -46,7 +45,7 @@ def quicksort_iterative(amendments, ascending=True):
             top -= 1
 
             # Chama a função para particionar e retornar a posição do pivo (menores a esquerda e maiores a direita)
-            p = partition(amendments, low, high,ascending)
+            p = partition(amendments, low, high,ascending, key=key)
 
             # Se houver elementos à esquerda do pivô, coloca-os na pilha
             if p - 1 > low:

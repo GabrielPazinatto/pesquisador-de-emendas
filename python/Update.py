@@ -11,15 +11,6 @@ class Updater:
         #################################
         #    MAPEAMENTO DE INDICES
         #################################
-        self.indices = Hash(
-            entries={
-                'uid' : 0,
-                'value' : 1,
-                'state' : 2,
-                'function' : 3,
-                'author' : 4,
-                'year' : 5,
-            })
         
         self.functions_record = Hash(
             entries={
@@ -49,7 +40,7 @@ class Updater:
         #  MAPEAMENTO DE PONTEIROS PARA 
         #      EMENDAS POR ESTADO
         ################################
-        self.states_record = Hash(
+        self.locals_record = Hash(
             entries={
             'AC': [],  # Acre
             'AL': [],  # Alagoas
@@ -109,7 +100,7 @@ class Updater:
         #   MAPEAMENTO DE ESTADOS  
         #       PARA ACRONIMOS
         ################################
-        self.state_acronym = Hash(
+        self.local_acronym = Hash(
             entries ={
                 "ACRE": "AC",
                 "ALAGOAS": "AL",
@@ -145,7 +136,7 @@ class Updater:
     def update_data_set(self):
         start = time.process_time()
         print("Atualizando base de dados...") 
-        self._generate_bin_files("Emendas.csv")
+        self._generate_bin_files("python/Emendas.csv")
         print("Base de dados atualizada em ", 
             time.process_time() - start, "s!")
         
@@ -155,10 +146,10 @@ class Updater:
         
         # Abre os arquivos a serem escritos e passa por referência para as funções
         # Evita que sejam abertos múltiplas vezes
-        main_file = open("Amendments.bin", "wb+")
-        pointers_file = open("Pointers.bin", "wb+")
-        authors_file = open("Authors.bin", "wb+")
-        local_file = open("local.bin", "wb+")
+        main_file = open("bin/Amendments.bin", "wb+")
+        pointers_file = open("bin/Pointers.bin", "wb+")
+        authors_file = open("bin/Authors.bin", "wb+")
+        local_file = open("bin/local.bin", "wb+")
         
         self.__init__()
         
@@ -175,7 +166,7 @@ class Updater:
         # Arquivos invertidos
         self._generate_pointers_file(file = pointers_file)
         self._generate_authors_file(file = authors_file)
-        self._generate_states_file(file = local_file)
+        self._generate_locals_file(file = local_file)
 
         authors_file.close()
         main_file.close()
@@ -199,14 +190,21 @@ class Updater:
             item = self._process_entry(row, uids[i])
 
             #Gera listas de ponteiro para itens de cada Estado
-            self._update_states_record(item = item, main_file = main_file)
+            self._update_locals_record(item = item, main_file = main_file)
             # Gera listas de ponteiro para itens de cada função
             self._update_functions_record(item=item, main_file= main_file)
             # Atualiza a árvore Trie com os nomes presentes no csv e suas respectivas emendas
             self._update_authors_record(item = item, main_file = main_file)
             
             # Transforma os itens do dicionário em uma lista, tornando o armazenamento mais eficiente
-            item = [item['uid'], item['value'], item['state'], item['function'], item['author'], item['year']]
+            item = {
+                'uid': item['uid'], 
+                'value': item['value'], 
+                'local': item['local'], 
+                'function': item['function'], 
+                'author': item['author'], 
+                'year': item['year']
+            }
             
             # Insere entrada (emenda) no arquivo de armazenamento principal
             pickle.dump(file= main_file, obj= item)
@@ -226,10 +224,10 @@ class Updater:
             self.functions_record[item['function']].append(main_file.tell())
 
     #Atualiza o resgistro de emendas por Localidade
-    def _update_states_record(self, item , main_file):
+    def _update_locals_record(self, item , main_file):
         #Se o Estado não estiver no dicionário, informa erro
-        if item['state'] in self.states_record.keys():
-            self.states_record[item['state']].append(main_file.tell()) #coloca o ponteiro para o arquivo principal no Estado ou Região correspondente
+        if item['local'] in self.locals_record.keys():
+            self.locals_record[item['local']].append(main_file.tell()) #coloca o ponteiro para o arquivo principal no Estado ou Região correspondente
             
 
     ##########################################################################
@@ -246,8 +244,8 @@ class Updater:
             pickle.dump(file = file, obj=item)
 
     #Armazena as listas dos ponteiros das emendas por localidade
-    def _generate_states_file(self, file):
-        pickle.dump(file = file, obj = self.states_record)
+    def _generate_locals_file(self, file):
+        pickle.dump(file = file, obj = self.locals_record)
             
 ##########################################################################
     # Processa uma entrada do arquivo csv
@@ -257,7 +255,7 @@ class Updater:
             entries={
             'uid' : -1,
             'value' : 0,
-            'state' : '',
+            'local' : '',
             'function' : '',
             'author' : '',
             'year' : -1        
@@ -274,7 +272,7 @@ class Updater:
         item['uid'] = uid
         item['value'] = value
         
-        item['state'] = (self._get_state_name(row['Localidade do gasto']))
+        item['local'] = (self._get_local_name(row['Localidade do gasto']))
         item['function'] = (row["Nome Função"])
         item['author'] = (row["Nome do Autor da Emenda"])
         item['year'] = (int(row["Ano da Emenda"]))      
@@ -283,7 +281,7 @@ class Updater:
 
 ##########################################################################
     # Dado um campo "localidade" de uma emenda, retorna o estado (sigla) mencionado na string
-    def _get_state_name(self, s:str) -> str:
+    def _get_local_name(self, s:str) -> str:
 
         #Padroniza as informações
         s = s.upper().strip()
@@ -302,8 +300,8 @@ class Updater:
         
         #Caso "Rio Grande do Sul (UF)"
         if '(UF)' in s:
-            state_name = s.replace('(UF)', '').strip()
-            return self.state_acronym.get(state_name, "Formato inválido")
+            local_name = s.replace('(UF)', '').strip()
+            return self.local_acronym.get(local_name, "Formato inválido")
         
         #Casos especiais 
         if s == "NACIONAL" or s == "MULTIPLO":

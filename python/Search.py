@@ -17,15 +17,6 @@ class Searcher(Loader):
 
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
-
-        # print("Escolha a função: ")
-        # print("(0) Saúde")
-        # print("(1) Educação")
-        # print("(2) Urbanismo")
-        # print("(3) Agricultura")
-        # print("(4) Assistência social")
-        # print("(5) Outros")
-        # function = input()
                 
         #Valida a função
         if function_name not in self.functions_pointers.keys():
@@ -44,10 +35,9 @@ class Searcher(Loader):
             main_file.seek(pointer)     #offset no arquivo principal 
             amendments.append(pickle.load(main_file)) #carrega do arquivo principal
 
-
         main_file.close()
 
-        amendments = quicksort_iterative(amendments, ascending)
+        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
 
         quantity = 0 #Total de emendas dessa função
         total_value = 0 #Total gasto nessa área (Saúde, Educação..)
@@ -55,7 +45,7 @@ class Searcher(Loader):
         #Salva as informações da emenda por linha
         for a in amendments:
             quantity += 1
-            total_value += a[self.indices['value']]
+            total_value += a['value']
 
         return {'amendments': amendments, 
                 'quantity' : quantity, 
@@ -89,14 +79,14 @@ class Searcher(Loader):
 
         main_file.close()
 
-        amendments = quicksort_iterative(amendments, ascending)
+        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
 
         #Salva as informações da emenda por linha
         quantity = 0
         total_value = 0
         for a in amendments:
             quantity += 1
-            total_value += a[self.indices['value']]
+            total_value += a['value']
 
         return {'amendments': amendments, 
                 'quantity' : quantity, 
@@ -109,12 +99,12 @@ class Searcher(Loader):
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
         #Confere se a localidade de entrada é válida 
-        if local_name not in self.states_record.keys():
+        if local_name not in self.locals_record.keys():
             print("Localidade inválida")
             return
         
         #Salva a lista de offsets para as emendas dessa localidade
-        pointers = self.states_record[local_name][page*page_size:(page + 1)*page_size]
+        pointers = self.locals_record[local_name][page*page_size:(page + 1)*page_size]
         
         #Lista para armazenas as emendas
         amendments = []
@@ -126,14 +116,14 @@ class Searcher(Loader):
 
         main_file.close()
         
-        amendments = quicksort_iterative(amendments, ascending)
-
+        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
+        
         #Salva as informações da emenda por linha
         total_value = 0  #total gasto nessa localidade
         quantity = 0     #total de emendas nessa localidade
         for a in amendments:
             quantity += 1
-            total_value += a[self.indices['value']]
+            total_value += a['value']
 
         return {'amendments': amendments, 
                 'quantity' : quantity, 
@@ -211,18 +201,18 @@ class Searcher(Loader):
         value_by_local = Hash()
 
         #Utiliza os offsets do arquivo invertido 
-        for key in self.states_record.keys():
-            pointers = self.states_record[key]
+        for key in self.locals_record.keys():
+            pointers = self.locals_record[key]
 
             for pointer in pointers:
                 main_file.seek(pointer)     #offset no arquivo principal 
                 emenda = pickle.load(main_file) #carrega do arquivo principal
                 
-                if value_by_local[emenda[self.indices['state']]] == None: #Se ainda não está na Hash 
-                    value_by_local[emenda[self.indices['state']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor e a quantidade 
+                if value_by_local[emenda[self.indices['local']]] == None: #Se ainda não está na Hash 
+                    value_by_local[emenda[self.indices['local']]] = [emenda[self.indices['value']], 1] #Adiciona o primeiro valor e a quantidade 
                 else:
-                    value_by_local[emenda[self.indices['state']]][0] += emenda[self.indices['value']] #Soma o valor total
-                    value_by_local[emenda[self.indices['state']]][1] += 1 #Soma as quantidades
+                    value_by_local[emenda[self.indices['local']]][0] += emenda[self.indices['value']] #Soma o valor total
+                    value_by_local[emenda[self.indices['local']]][1] += 1 #Soma as quantidades
             
         main_file.close()
 

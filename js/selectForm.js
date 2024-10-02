@@ -1,5 +1,5 @@
 const LOCAL_FORM = `
-    <form id='searchForm'>
+    <form id='searchForm' onSubmit="return false;">
         <label>Local:</label>
         <select id="param">
             <option value="AC">Acre (AC)</option>
@@ -33,13 +33,13 @@ const LOCAL_FORM = `
     </form>
 `
 const AUTHOR_FORM = `
-        <form id="searchForm" onsubmit="return null;">
+        <form id="searchForm" onSubmit="return false;">
             <label>Nome do autor:</label>
             <input type="text" id="param">
         </form>
 `
 const FUNCTION_FORM = `
-    <form id="searchForm">
+    <form id="searchForm" onSubmit="return false;">
         <label>Nome da função:</label>
         <select id="param">
             <option value="Saúde">Saúde</option>

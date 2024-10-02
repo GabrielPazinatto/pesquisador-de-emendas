@@ -27,7 +27,7 @@ class Loader(Updater):
         self.authors_record = pickle.load(authors_file)
         
         # Carrega em memória os ponteiros mapeados por estado
-        self.states_record = pickle.load(local_file)
+        self.locals_record = pickle.load(local_file)
         
         pointers_file.close()
         main_file.close()
