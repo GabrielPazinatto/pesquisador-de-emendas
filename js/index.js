@@ -39,8 +39,8 @@ function displayAmendments(data) {
  * @param {number} [pageSize=100] - The number of items per page (default is 100).
  * @returns {Promise<void>} - A promise that resolves when the fetch operation is complete.
  */
-async function fetchAmendments(searchType, searchParam, page=0, pageSize=100) {
-    let url = `http://localhost:8000/${searchType}/${searchParam}/?page=${page}&page_size=${pageSize}`;
+async function fetchAmendments(searchType, searchParam, page=0, pageSize=100, sortOrdering='true', sortKey='value') {
+    let url = `http://localhost:8000/${searchType}/${searchParam}/?page=${page}&page_size=${pageSize}&ascending=${sortOrdering}&sort_key=${sortKey}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -62,7 +62,9 @@ async function fetchAmendments(searchType, searchParam, page=0, pageSize=100) {
 async function getPageParameters(){
     const page = document.getElementById('page').value;
     const pageSize = document.getElementById('page-size').value;
-    return {page, pageSize};
+    const sortOrdering = document.querySelector('input[name="sort-ordering"]:checked').value;
+    const sortKey = document.querySelector('input[name="sort-key"]:checked').value;
+    return {page, pageSize, sortOrdering, sortKey};
 };
 
 
@@ -83,25 +85,33 @@ async function sumbitSearch(){
     const additionalParams = await getPageParameters();
     
     if(searchType == 'local'){ 
-        fetchAmendments('search-by-local', searchParam, additionalParams.page, additionalParams.pageSize);
+        fetchAmendments('search-by-local', searchParam, 
+            additionalParams.page, additionalParams.pageSize, additionalParams.sortOrdering, additionalParams.sortKey);
     }
     else if(searchType == 'author-name'){
-        fetchAmendments('search-by-author', searchParam, additionalParams.page, additionalParams.pageSize);
+        fetchAmendments('search-by-author', searchParam, 
+            additionalParams.page, additionalParams.pageSize, additionalParams.sortOrdering, additionalParams.sortKey);
     }
     else if(searchType == 'function'){
-        fetchAmendments('search-by-function', searchParam, additionalParams.page, additionalParams.pageSize);
+        fetchAmendments('search-by-function', searchParam,
+            additionalParams.page, additionalParams.pageSize, additionalParams.sortOrdering, additionalParams.sortKey);
     };
 };
 
+/*--------------------------------------------
+                EVENT LISTENERS
+--------------------------------------------*/
 
 const increasePageButton = document.getElementById('increase-page');    
+const decreasePageButton = document.getElementById('decrease-page');
+const submitButton = document.getElementById('submit-button');
+
 increasePageButton.addEventListener('click', () => {
     const pageElement = document.getElementById('page');
     pageElement.value = parseInt(pageElement.value) + 1;
     sumbitSearch();
 });
 
-const decreasePageButton = document.getElementById('decrease-page');
 decreasePageButton.addEventListener('click', () => {
     const pageElement = document.getElementById('page');
     let newVal = parseInt(pageElement.value) - 1;
@@ -111,5 +121,6 @@ decreasePageButton.addEventListener('click', () => {
     sumbitSearch();
 });
 
-const submitButton = document.getElementById('submit-button');
 submitButton.addEventListener('click', sumbitSearch);
+
+

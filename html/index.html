@@ -8,52 +8,105 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pesquisador de Emendas</title>
+
+    <style>
+        .parent {
+            padding: 10px;
+            display:inline-flex;
+        }
+
+        .inline-child {
+            padding: 10px;
+            border: 1px solid lightgray;
+            vertical-align: top;
+            width: fit-content;
+            align-items: center;
+        }
+    </style>
+
 </head>
 <body>
 
-    <center>
-        <h1>Pesquisador De Emendas</h1>
-    </center>
+    <center><h1>Pesquisador De Emendas</h1></center>
     <hr>
-    <form onSubmit="return false;">
-        <fieldset>
-            <legend>
-                Tipo de Busca:
-            </legend>
-            <label>
-                <input type="radio" id="author-search-button" name="search-type" value="author-name"> Por Autor
-            </label>
-            <label>
-                <input type="radio" id="local-search-button" name="search-type" value="local" checked> Por Localidade
-            </label>
-            <label>
-                <input type="radio" id="function-search-button" name="search-type" value="function"> Por Função
-            </label>
-            <br>
-        </fieldset>
-    </form>
 
-    <form onSubmit="return false;">
-        <fieldset>
-            <label>
-                Quantidade de Emendas:
-                <input type="text" id="page-size" placeholder="100" value="100">
-            </label>
+    <div class="parent">
+        <div class="inline-child">
+            <form onSubmit="return false;">
+                <fieldset>
+                    <legend>
+                        Tipo de Busca:
+                    </legend>
+                    <label>
+                        <input type="radio" id="author-search-button" name="search-type" value="author-name"> Por Autor
+                    </label>
+                    <label>
+                        <input type="radio" id="local-search-button" name="search-type" value="local" checked> Por Localidade
+                    </label>
+                    <label>
+                        <input type="radio" id="function-search-button" name="search-type" value="function"> Por Função
+                    </label>
+                    <br>
+                </fieldset>
+            </form>
             <br>
-            <label>
-                Página:
-                <input type="text" id="page" placeholder="0" value="0" style="width:50px;">
-            </label>
-            <button type="button", id="decrease-page">Voltar</button>
-            <button type="button", id="increase-page">Avançar</button>
-        </fieldset>
-    </form>
+            <div id="search-form"></div>
+            <br>
+            <button type="button" id="submit-button">Buscar</button>
+        </div>
+        
 
-    <br>
-    <div id="search-form"></div>
-    <br>
-    <button type="button" id="submit-button">Buscar</button>
-    <script src="../js/selectForm.js"></script>
+        <div class="inline-child">
+            <center>
+            <form onSubmit="return false;">
+                <fieldset>
+                    <legend>
+                        Ordenação:
+                    </legend>
+                    <label>
+                        <input type="radio" id="dec-sort-button" name="sort-ordering" value="false" checked> Decrescente
+                    </label>
+                    <label>
+                        <input type="radio" id="inc-sort-button" name="sort-ordering" value="true"> Crescente
+                    </label>
+                </fieldset>
+                <br>
+                <fieldset>
+                    <legend>
+                        Ordenar Por:
+                    </legend>
+                    <label>
+                        <input type="radio" id="value-sort-button" name="sort-key" value="value" checked> Valor
+                    </label>
+                    <label>
+                        <input type="radio" id="function-sort-button" name="sort-key" value="function"> Função
+                    </label>
+                    <label>
+                        <input type="radio" id="year-sort-button" name="sort-key" value="year"> Ano
+                    </label>
+                </fieldset>
+            </form>
+        </center>
+        </div>
+        
+        <div class="inline-child">
+            <form onSubmit="return false;">
+                <fieldset>
+                    <label>
+                        Quantidade de Emendas:
+                        <input type="text" id="page-size" placeholder="100" value="100">
+                    </label>
+                    <br>
+                    <label>
+                        Página:
+                        <input type="text" id="page" placeholder="0" value="0" style="width:50px;">
+                    </label>
+                    <button type="button", id="decrease-page">Voltar</button>
+                    <button type="button", id="increase-page">Avançar</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
 
     <hr>
     <center>
@@ -73,6 +126,7 @@
         </table>
     </center>           
     
+    <script src="../js/selectForm.js"></script>
     <script src="../js/index.js"></script>
 </body>
 </html>

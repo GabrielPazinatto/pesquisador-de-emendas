@@ -1,8 +1,8 @@
 from .Hash import Hash
 from .Load import Loader
-from .quicksort import quicksort_iterative
 
 import pickle
+from operator import itemgetter
 
 _MAIN_FILE_PATH = "bin/Amendments.bin"
 
@@ -13,7 +13,7 @@ class Searcher(Loader):
 
 ################################################################################################
     #Busca por as emendas por função utilizando o arquivo invertido
-    def search_by_function(self, function_name:str, ascending: bool, page_size:int = 100, page:int = 0):
+    def search_by_function(self, function_name:str, ascending: bool, page_size:int = 100, page:int = 0, key:str = 'value'):
 
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
@@ -25,35 +25,34 @@ class Searcher(Loader):
                 'total_value': 0}	
         
         #Salva a lista de ponteiros (offset) para essa emendas 
-        pointers = self.functions_pointers[function_name][page*page_size:(page + 1)*page_size]
+        pointers = self.functions_pointers[function_name]
 
         amendments = []
 
         #Carrega as emendas do arquivo principal
-
         for pointer in pointers:
             main_file.seek(pointer)     #offset no arquivo principal 
             amendments.append(pickle.load(main_file)) #carrega do arquivo principal
 
         main_file.close()
 
-        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
-
         quantity = 0 #Total de emendas dessa função
         total_value = 0 #Total gasto nessa área (Saúde, Educação..)
-
+        
         #Salva as informações da emenda por linha
         for a in amendments:
             quantity += 1
             total_value += a['value']
 
-        return {'amendments': amendments, 
+        amendments.sort(key=itemgetter(key), reverse = not ascending)
+
+        return {'amendments': amendments[page*page_size:(page + 1)*page_size], 
                 'quantity' : quantity, 
                 'total_value': total_value}
 
 ##############################################################################################################################
     #Busca as emendas pelo autor
-    def search_by_author(self, author_name:str = None, ascending:bool = True, page_size:int = 100, page:int = 0):
+    def search_by_author(self, author_name:str = None, ascending:bool = True, page_size:int = 100, page:int = 0, key:str = 'value'):
         
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
@@ -63,7 +62,7 @@ class Searcher(Loader):
             author_name = input()
         
         #Procura na TRIE o offset pelos nomes dos parlamentares 
-        amendments_addr = self.authors_record.search_by_prefix(author_name)[page*page_size:(page + 1)*page_size]
+        amendments_addr = self.authors_record.search_by_prefix(author_name)
         
         #Valida o nome dado na entrada
         if amendments_addr == None:
@@ -79,8 +78,8 @@ class Searcher(Loader):
 
         main_file.close()
 
-        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
-
+        amendments.sort(key=itemgetter(key), reverse = not ascending)
+        
         #Salva as informações da emenda por linha
         quantity = 0
         total_value = 0
@@ -88,13 +87,13 @@ class Searcher(Loader):
             quantity += 1
             total_value += a['value']
 
-        return {'amendments': amendments, 
+        return {'amendments': amendments[page*page_size:(page + 1)*page_size], 
                 'quantity' : quantity, 
                 'total_value': total_value}
 
 ####################################################################################################################################
     #Busca as emendas por localidade (Estado, região do Brasil, ou Exterior)
-    def search_by_local(self, local_name:str = None, ascending:bool = True, page_size:int = 100, page:int = 0):
+    def search_by_local(self, local_name:str = None, ascending:bool = True, page_size:int = 100, page:int = 0, key:str = 'value'):
         #Abertura do arquivo principal
         main_file = open(_MAIN_FILE_PATH, 'rb')
 
@@ -104,7 +103,7 @@ class Searcher(Loader):
             return
         
         #Salva a lista de offsets para as emendas dessa localidade
-        pointers = self.locals_record[local_name][page*page_size:(page + 1)*page_size]
+        pointers = self.locals_record[local_name]
         
         #Lista para armazenas as emendas
         amendments = []
@@ -116,7 +115,7 @@ class Searcher(Loader):
 
         main_file.close()
         
-        amendments = quicksort_iterative(amendments, ascending=ascending, key='value')
+        amendments.sort(key=itemgetter(key), reverse = not ascending)
         
         #Salva as informações da emenda por linha
         total_value = 0  #total gasto nessa localidade
@@ -125,7 +124,7 @@ class Searcher(Loader):
             quantity += 1
             total_value += a['value']
 
-        return {'amendments': amendments, 
+        return {'amendments': amendments[page*page_size:(page + 1)*page_size], 
                 'quantity' : quantity, 
                 'total_value': total_value}
 
