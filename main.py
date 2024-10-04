@@ -1,6 +1,7 @@
 import sys
 sys.path.append('python')
 
+import uvicorn
 from fastapi import FastAPI
 from python.Search import Searcher
 from typing import Optional
@@ -47,3 +48,7 @@ async def search_by_author(author_name: str, page: Optional[int] = 0, page_size:
     return {"amendments": result['amendments'],
             "quantity": result['quantity'],
             "total_value": result['total_value']}
+    
+    
+if __name__ == '__main__':
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
