@@ -44,7 +44,6 @@ pyinstaller-hooks-contrib==2024.8
 pyTermTk==0.40.0a1
 python-dateutil==2.9.0.post0
 pytz==2024.1
-pywin32==306
 pywin32-ctypes==0.2.3
 pyzmq==25.1.2
 raylib==5.0.0.3
