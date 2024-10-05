@@ -40,7 +40,7 @@ function displayAmendments(data) {
  * @returns {Promise<void>} - A promise that resolves when the fetch operation is complete.
  */
 async function fetchAmendments(searchType, searchParam, page=0, pageSize=100, sortOrdering='true', sortKey='value') {
-    let url = `http://localhost:8000/${searchType}/${searchParam}/?page=${page}&page_size=${pageSize}&ascending=${sortOrdering}&sort_key=${sortKey}`;
+    let url = `https://pesquisador-de-emendas.onrender.com/${searchType}/${searchParam}/?page=${page}&page_size=${pageSize}&ascending=${sortOrdering}&sort_key=${sortKey}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
