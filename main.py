@@ -1,6 +1,3 @@
-import sys
-sys.path.append('python')
-
 import uvicorn
 from fastapi import FastAPI
 from python.Search import Searcher
