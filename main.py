@@ -5,18 +5,9 @@ import uvicorn
 from fastapi import FastAPI
 from python.Search import Searcher
 from typing import Optional
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 data_manager = Searcher()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 #data_manager.update_data_set()
 data_manager.load_data()
