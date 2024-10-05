@@ -1,7 +1,4 @@
-import sys
-sys.path.append('python')
 
-import uvicorn
 from fastapi import FastAPI
 from python.Search import Searcher
 from typing import Optional
@@ -9,14 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 data_manager = Searcher()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 #data_manager.update_data_set()
 data_manager.load_data()
@@ -49,6 +38,3 @@ async def search_by_author(author_name: str, page: Optional[int] = 0, page_size:
             "quantity": result['quantity'],
             "total_value": result['total_value']}
     
-    
-if __name__ == '__main__':
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
